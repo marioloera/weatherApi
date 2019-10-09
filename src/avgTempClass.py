@@ -14,7 +14,7 @@ class AvgTempClass:
         if (self.DaysCount > 0):
             return self._TemMinAcco/self.DaysCount
         else:
-            return
+            return 
 
     def GetMaxAvgTemp(self):
         if (self.DaysCount > 0):

@@ -1,0 +1,79 @@
+{
+    "name": "DailyForecasts",
+    "namespace": "weather.avro",
+    "type": "record",
+    "fields": [
+        {
+            "name": "Date",
+            "type": "string"
+        },
+        {
+            "name": "MinTemperature_C",
+            "type": [
+                "double",
+                "null"
+            ]
+        },
+        {
+            "name": "MaxTemp_C",
+            "type": [
+                "double",
+                "null"
+            ]
+        },
+        {
+            "name": "DayCloudCover",
+            "type": [
+                "int",
+                "null"
+            ]
+        },
+        {
+            "name": "DaySnow_cm",
+            "type": [
+                "double",
+                "null"
+            ]
+        },
+        {
+            "name": "DayRain_mm",
+            "type": [
+                "double",
+                "null"
+            ]
+        },
+        {
+            "name": "SunHours",
+            "type": [
+                "double",
+                "null"
+            ]
+        },
+        {
+            "name": "SnowProbAtNight",
+            "type": [
+                "int",
+                "null"
+            ]
+        },
+        {
+            "name": "WindSpeedDay_km/h",
+            "type": [
+                "double",
+                "null"
+            ]
+        },
+        {
+            "name": "Year",
+            "type": "int"
+        },
+        {
+            "name": "Month",
+            "type": "int"
+        },
+        {
+            "name": "Day",
+            "type": "int"
+        }
+    ]
+}

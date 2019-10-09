@@ -1,7 +1,7 @@
 {
 	"RunLog": {
-		"Folder": "RunLog/",
-		"LogFile": "Run.log"
+		"Folder": "data/logs/",
+		"LogFile": "run.log"
 	},
 	
 	"Read": {
@@ -10,9 +10,9 @@
 			"ApiKey": "cRdHhtI104J362qCvmOmeIPId0B2Ayhy",
 			"DaysOfForecasts": 5
 		},
-		"SaveRawData": false,
-		"AccuWeatherData": "AccuWeatherData/responseData",
-		"MockingDataFile": "AccuWeatherData/mockingData.json",
+		"SaveRawData": true,
+		"AccuWeatherData": "./data/accuWeatherData/apiData",
+		"MockingDataFile": "./data/accuWeatherData/mockingData.json",
 		"MockinghMode": true
 	},
 
@@ -21,18 +21,18 @@
 		"Extract": {
 			"Days": 2,
 			"DateISO8601Format":  "%Y-%m-%dT%H:%M:%S+02:00",
-			"DaySuperSchemaFile": "./Config/daySuperSchema.json",
-			"AutGenSchemaFile": "./AutGenAvroSchema.json"
+			"DaySuperSchemaFile": "./config/daySuperSchema.json",
+			"AutGenSchemaFile": "./autGenAvroSchema.json"
 		},
 		"Load": {
 			"Avro": {
-				"SchemaFile": "./Config/dayAvroSchema.json",
-				"File": "ForecastAvroData.avro"
+				"SchemaFile": "./config/dayAvroSchema.json",
+				"File": "forecastAvroData.avro"
 			},
 			"AvgData": {
-				"Folder": "AverageForecastData/",
+				"Folder": "./data/averageForecastData/",
 				"StringSeparator": ", ",
-				"DWHForecastPath": "./WarehouseForecastData/"
+				"DWHForecastPath": "./data/WarehouseForecastData/"
 			}
 		}
 	}

@@ -28,12 +28,12 @@ def ReadData(config, startTime):
                                                             log)
 
     # Save CommandGetData to LastRun
-    with open(runLogFolder+'CommandGetData.txt', "w") as file:
+    with open(runLogFolder+'commandGetData.txt', "w") as file:
         file.write(str(startTime) + '\n'+fetchDataCmd)
 
     if (dataFetched):
         # Save AccuWeatherData to LastRun
-        with open(runLogFolder+"AccuWeatherData.json", 'w') as outfile:
+        with open(runLogFolder+"accuWeatherData.json", 'w') as outfile:
             json.dump(apiData, outfile, sort_keys=True,
                       indent=4, ensure_ascii=False)
 

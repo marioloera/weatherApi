@@ -1,7 +1,7 @@
 import json
 import avro
 import datetime
-from Modules import avgTempClass
+from src import avgTempClass
 from avro.datafile import DataFileReader, DataFileWriter
 from avro.io import DatumReader, DatumWriter
 import pprint
@@ -255,8 +255,8 @@ def LoadAveTemp(config, dayAccuTemp):
     # Get average temperatures in one row
     averageForecastData = dayAccuTemp.GetOneRowInfo(strSep)
     # Save AccuWeatherData to LastRun
-    with open(LastRunFolder+'AvgData.txt', "w") as file:
+    with open(LastRunFolder+'avgData.txt', "w") as file:
         file.write(averageForecastData)
     # Save AccuWeatherData to AverageForecastDataFolder
-    with open(avgDataFolder+'AvgData.txt', "a") as file:
+    with open(avgDataFolder+'avgData.txt', "a") as file:
         file.write("{}\n".format(averageForecastData))
