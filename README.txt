@@ -27,12 +27,16 @@ config.json file has attributes to modify the execution of the program
 		AdvanceMode: to run advance ETL mode
 
 
-RunLog folder contatins:
+data folder contains:
+	accWWeatherData
 			*AccuWeatherData.json [raw api data] 
+	averageForecastData
 			*AvgData.txt [one line]
-			*CommandGetData.txt [command that was used to fetch api data]
-			*ForecastAvroData.avro [data extracted from api data]
-			*AutGenAvroSchema.json [schema for avro data in json format]
+	warehouseForecastData
+			*forecastAvroData.avro [data extracted from api data]
+			*autGenAvroSchema.json [schema for avro data in json format]
+			*simpleETL.avro [data extracted from api data]
 			*DayForecastData []
-			*Run.log [ ] log information
+	logs
+			*run.log [ ] log information
 	
