@@ -7,16 +7,13 @@ from avro.io import DatumReader, DatumWriter
 import pprint
 
 pp = pprint.PrettyPrinter(indent=1, width=3)
-LastRunFolder = ''
-RunLog = ''
-DateISO8601Format = ''
-DaySuperSchemaJson = ''
 
 
 def SimpleETL(config, rawJsonData):
     print("**********************Simple ET*************************")
-    FillVariables(config)
     daysOfForecasts = len(rawJsonData["DailyForecasts"])
+    logFolder = config["RunLog"]["Folder"]
+    logFile = logFolder + config["RunLog"]["LogFile"]
     days = []
     try:
         # ET
@@ -44,7 +41,7 @@ def SimpleETL(config, rawJsonData):
         schema = avro.schema.Parse(dayAvroSchemaString)
 
         # create a writer
-        dataAvro = LastRunFolder+"simpleETL.avro"
+        dataAvro = logFolder+"simpleETL.avro"
         writer = DataFileWriter(open(dataAvro, "wb"),
                                 DatumWriter(), schema)
 
@@ -55,67 +52,54 @@ def SimpleETL(config, rawJsonData):
         # close writer
         writer.close()
         print("**********************Simple Check**********************")
-        reader = DataFileReader(open(dataAvro, "rb"),
-                                DatumReader())
-        for day in reader:
-            pp.pprint(day)
+        ReadAvro(dataAvro)
 
     except Exception as ex:
         print(ex)
+        with open(logFile, "a") as file:
+            file.write("{}\n".format(ex))
 
 
-def AdvanceETL(config, ApiDataJson):
-    FillVariables(config)
-    [extractSuccesful, DayKeyArray] = ExtractData(config, ApiDataJson)
+def AdvanceETL(config, apiDataJson):
+    superSchemaFile = config["ETL"]["Extract"]["DaySuperSchemaFile"]
+    superSchema = json.load(open(superSchemaFile, "r"))
+    [extractSuccesful, dayKeyArray] = ExtractData(config, superSchema, apiDataJson)
 
     if(extractSuccesful):
-        [tranformSuccesful, DayArray, DayAccuTemp] = Transform(DayKeyArray)
+        [tranformSuccesful, dayArray, avgTemp] = Transform(config, superSchema, dayKeyArray)
 
     if(tranformSuccesful):
         # Load AverageTemp Datafile
-        LoadAveTemp(config, DayAccuTemp)
+        LoadAveTemp(config, avgTemp)
 
         # Load Forecast in Avro
-        LoadAvro(config, DayArray)
-
-        CheckAvroLoad(config)
+        LoadAvro(config, superSchema, dayArray)
 
 
-def FillVariables(config):
-    # extTan
-    global LastRunFolder
-    global RunLog
-    global DateISO8601Format
-    global DaySuperSchemaJson
-    LastRunFolder = config["RunLog"]["Folder"]
-    RunLog = config["RunLog"]["LogFile"]
-    DateISO8601Format = config["ETL"]["Extract"]["DateISO8601Format"]
-    daySuperSchemaFile = config["ETL"]["Extract"]["DaySuperSchemaFile"]
-    DaySuperSchemaJson = json.load(open(daySuperSchemaFile, "r"))
-
-
-def ExtractData(config, rawJsonData):
+def ExtractData(config, superSchema, rawDataJson):
     print("**********************Extracting Data*************************")
+    logFolder = config["RunLog"]["Folder"]
+    logFile = logFolder + config["RunLog"]["LogFile"]
     daysToExtract = config["ETL"]["Extract"]["Days"]
-    daysOfForecasts = len(rawJsonData[DaySuperSchemaJson["name"]])
+    daysOfForecasts = len(rawDataJson[superSchema["name"]])
     dayKeyArray = []
     try:
         for dayNumer in range(0, min(daysToExtract, daysOfForecasts)):
             dicDay = {}  # create an empty dictionary
-            Day = rawJsonData[DaySuperSchemaJson["name"]][dayNumer]
+            dayJson = rawDataJson[superSchema["name"]][dayNumer]
             # print str(dayNumer)+'-----------'
-            for fiel in DaySuperSchemaJson["fields"]:
-                # restar day object for the next fiel
-                day = Day
+            for field in superSchema["fields"]:
+                # restar day object for the next field
+                day = dayJson
                 # go throug the labels in accWeather json
-                for label in fiel["accWeatherLabels"]:
+                for label in field["accWeatherLabels"]:
                     obj = day[label]
                     day = obj
-                if (fiel["multiple"] != 0):
-                    obj = obj*fiel["multiple"]
-                # print  str(fiel["name"]) + '  '+str(obj)
-                dicDay[fiel["fieldKey"]] = obj
-                # dicDay[fiel["name"]]= obj
+                if (field["multiple"] != 0):
+                    obj = obj * field["multiple"]
+                # print  str(field["name"]) + '  '+str(obj)
+                dicDay[field["fieldKey"]] = obj
+                # dicDay[field["name"]]= obj
                 # pp.pprint(dicDay)
             dayKeyArray.append(dicDay)
         statusMessage = "Extracting accuWeatherDataJson was successfull!"
@@ -126,26 +110,27 @@ def ExtractData(config, rawJsonData):
         print(ex)
         status = False
         pass
-        # Save RunStatusMessage to LastRun
-    with open(LastRunFolder+RunLog, "a") as file:
+        # log message
+    with open(logFile, "a") as file:
         file.write("{}\n".format(statusMessage))
     return [status, dayKeyArray]
 
 
-def Transform(dayKeyArray):
+def Transform(config, superSchema, dayKeyArray):
     print("**********************Transforming Data***********************")
     # Create dictinary for fielKey and "fiel"name maping
     status = False
     mapKeyNames = {}
-    for fiel in DaySuperSchemaJson["fields"]:
+    for fiel in superSchema["fields"]:
         mapKeyNames[fiel["fieldKey"]] = fiel["name"]
     # print MapKeyNames[5] gets the name of key=5
 
     # object for average temperatures
-    dayAvgTemp = avgTempClass.AvgTempClass(str(datetime.datetime.now()))
+    avgTemp = avgTempClass.AvgTempClass(str(datetime.datetime.now()))
 
     # object for other fiels
-    ofields = DaySuperSchemaJson["otherFields"]
+    ofields = superSchema["otherFields"]
+    dateFormatISO8601 = config["ETL"]["Extract"]["DateISO8601Format"]
 
     # Creates empty array for Days
     dayArray = []
@@ -158,7 +143,7 @@ def Transform(dayKeyArray):
                 dicDay[name] = value
                 # fieldKey:1 date
                 if (key == 1):
-                    dt = datetime.datetime.strptime(value, DateISO8601Format)
+                    dt = datetime.datetime.strptime(value, dateFormatISO8601)
                     dicDay[ofields["date.year"]["name"]] = dt.year
                     dicDay[ofields["date.month"]["name"]] = dt.month
                     dicDay[ofields["date.day"]["name"]] = dt.day
@@ -169,18 +154,57 @@ def Transform(dayKeyArray):
                 if (key == 3):
                     maxTemp = value
             # add the min and max temps to comput the average
-            dayAvgTemp.AddTemValues(minTem, maxTemp)
+            avgTemp.addTemValues(minTem, maxTemp)
             # append the day to the array
             dayArray.append(dicDay)
             # pp.pprint(dicDay)
         status = True
     except Exception as ex:
         print(ex)
-    return [status, dayArray, dayAvgTemp]
+    return [status, dayArray, avgTemp]
+
+
+def LoadAvro(config, superSchema, daysArray):
+    print("**********************Loading ForecastDataAvro****************")
+    logFolder = config["RunLog"]["Folder"]
+    autGenSchemaFile = config["ETL"]["Extract"]["AutGenSchemaFile"]
+    forecastAvroFile = config["ETL"]["Load"]["Avro"]["File"]
+    dWHForecastPath = config["ETL"]["Load"]["AvgData"]["DWHForecastPath"]
+    
+    dayAvroSchema = AutogenerateSchema(superSchema)
+
+    with open(logFolder+autGenSchemaFile, "w") as file:
+        file.write(json.dumps(dayAvroSchema, indent=4))
+    # create avro.schema from json schema
+    dayAvroSchemaString = json.dumps(dayAvroSchema)
+    schema = avro.schema.Parse(dayAvroSchemaString)
+
+    avroFle = dWHForecastPath + forecastAvroFile
+    # create a writer for DWH
+    writer = DataFileWriter(open(avroFle, "wb"),
+                            DatumWriter(), schema)
+
+    # append each day
+    for day in daysArray:
+        # pp.pprint(day)
+        writer.append(day)
+
+    # close writer
+    writer.close()
+    # pp.pprint(writer)
+    ReadAvro(avroFle)
+
+
+def ReadAvro(file):
+    print("***********This information was store in avro format *********")
+    reader = DataFileReader(open(file,"rb"), DatumReader())
+    for r in reader:
+        pp.pprint(r)
 
 
 def AutogenerateSchema(baseShcema):
     print("**********************Autogenerate Schema*********************")
+    
     # target = json.load(open(DayAvroSchemaFile, "r"))
     # pp.pprint(target)
     autGenSchema = {}
@@ -205,58 +229,13 @@ def AutogenerateSchema(baseShcema):
     return autGenSchema
 
 
-def LoadAvro(config, daysArray):
-    print("**********************Loading ForecastDataAvro****************")
-    autGenSchemaFile = config["ETL"]["Extract"]["AutGenSchemaFile"]
-    forecastAvroFile = config["ETL"]["Load"]["Avro"]["File"]
-    dWHForecastPath = config["ETL"]["Load"]["AvgData"]["DWHForecastPath"]
-    dayAvroSchema = AutogenerateSchema(DaySuperSchemaJson)
-
-    with open(LastRunFolder+autGenSchemaFile, "w") as file:
-        file.write(json.dumps(dayAvroSchema, indent=4))
-    # create avro.schema from json schema
-    dayAvroSchemaString = json.dumps(dayAvroSchema)
-    schema = avro.schema.Parse(dayAvroSchemaString)
-
-    # create a writer for DWH
-    writer = DataFileWriter(open(dWHForecastPath+forecastAvroFile, "wb"),
-                            DatumWriter(), schema)
-
-    # create a writer for LasRun
-    writerLR = DataFileWriter(open(LastRunFolder+forecastAvroFile, "wb"),
-                              DatumWriter(), schema)
-
-    # append each day
-    for day in daysArray:
-        # pp.pprint(day)
-        writer.append(day)
-        writerLR.append(day)
-
-    # close writer
-    writer.close()
-    writerLR.close()
-    # pp.pprint(writer)
-
-
-def CheckAvroLoad(config):
-    print("***********This information was store in avro format *********")
-    forecastAvroFile = config["ETL"]["Load"]["Avro"]["File"]
-    reader = DataFileReader(open(LastRunFolder+forecastAvroFile, "rb"),
-                            DatumReader())
-    for day in reader:
-        pp.pprint(day)
-
-
-def LoadAveTemp(config, dayAccuTemp):
+def LoadAveTemp(config, avgTemp):
     print("**********************Loading Average Temp Data***************")
     # load AverageForecastData
     avgDataFolder = config["ETL"]["Load"]["AvgData"]["Folder"]
     strSep = config["ETL"]["Load"]["AvgData"]["StringSeparator"]
     # Get average temperatures in one row
-    averageForecastData = dayAccuTemp.GetOneRowInfo(strSep)
-    # Save AccuWeatherData to LastRun
-    with open(LastRunFolder+'avgData.txt', "w") as file:
-        file.write(averageForecastData)
+    averageForecastData = avgTemp.getOneRowInfo(strSep)
     # Save AccuWeatherData to AverageForecastDataFolder
     with open(avgDataFolder+'avgData.txt', "a") as file:
         file.write("{}\n".format(averageForecastData))

@@ -19,7 +19,7 @@
 	"ETL": {
 		"AdvanceMode": false,
 		"Extract": {
-			"Days": 3,
+			"Days": 1,
 			"DateISO8601Format":  "%Y-%m-%dT%H:%M:%S+02:00",
 			"DaySuperSchemaFile": "./config/daySuperSchema.json",
 			"AutGenSchemaFile": "./autGenAvroSchema.json"
