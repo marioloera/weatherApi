@@ -14,6 +14,7 @@ def simpleETL(config, rawJsonData):
     daysOfForecasts = len(rawJsonData["DailyForecasts"])
     logFolder = config["Log"]["Folder"]
     logFile = logFolder + config["Log"]["LogFile"]
+    dWHForecastPath = config["ETL"]["Load"]["AvgData"]["DWHForecastPath"]
     days = []
     try:
         # ET
@@ -41,7 +42,7 @@ def simpleETL(config, rawJsonData):
         schema = avro.schema.Parse(dayAvroSchemaString)
 
         # create a writer
-        dataAvro = logFolder+"simpleETL.avro"
+        dataAvro = dWHForecastPath+"simpleETL.avro"
         writer = DataFileWriter(open(dataAvro, "wb"),
                                 DatumWriter(), schema)
 
@@ -102,11 +103,11 @@ def _extractData(config, superSchema, rawDataJson):
                 # dicDay[field["name"]]= obj
                 # pp.pprint(dicDay)
             dayKeyArray.append(dicDay)
-        statusMessage = "Extracting accuWeatherDataJson was successfull!"
+        statusMessage = "\nExtracting accuWeatherDataJson was successfull!"
         status = True
         # pp.pprint(dayKeyArray)
     except Exception as ex:
-        statusMessage = "Reading accuWeatherDataJson Error!\n{}".format(ex)
+        statusMessage = "R\neading accuWeatherDataJson Error!\n{}".format(ex)
         print(ex)
         status = False
         pass
@@ -166,22 +167,21 @@ def _transform(config, superSchema, dayKeyArray):
 
 def _loadAvro(config, superSchema, daysArray):
     print("**********************Loading ForecastDataAvro****************")
-    logFolder = config["Log"]["Folder"]
     autGenSchemaFile = config["ETL"]["Extract"]["AutGenSchemaFile"]
     forecastAvroFile = config["ETL"]["Load"]["Avro"]["File"]
     dWHForecastPath = config["ETL"]["Load"]["AvgData"]["DWHForecastPath"]
     
     dayAvroSchema = _autogenerateSchema(superSchema)
 
-    with open(logFolder+autGenSchemaFile, "w") as file:
+    with open(dWHForecastPath+autGenSchemaFile, "w") as file:
         file.write(json.dumps(dayAvroSchema, indent=4))
     # create avro.schema from json schema
     dayAvroSchemaString = json.dumps(dayAvroSchema)
     schema = avro.schema.Parse(dayAvroSchemaString)
 
-    avroFle = dWHForecastPath + forecastAvroFile
+    avroFile = dWHForecastPath + forecastAvroFile
     # create a writer for DWH
-    writer = DataFileWriter(open(avroFle, "wb"),
+    writer = DataFileWriter(open(avroFile, "wb"),
                             DatumWriter(), schema)
 
     # append each day
@@ -192,7 +192,7 @@ def _loadAvro(config, superSchema, daysArray):
     # close writer
     writer.close()
     # pp.pprint(writer)
-    _readAvro(avroFle)
+    _readAvro(avroFile)
 
 
 def _readAvro(file):

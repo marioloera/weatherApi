@@ -8,8 +8,6 @@ def fetchData(config, startTime):
     runLog = config["Log"]["LogFile"]
     mockinghMode = config["Read"]["MockinghMode"]
     mockingDataFile = config["Read"]["MockingDataFile"]
-    saveRawData = config["Read"]["SaveRawData"]
-    accuWeatherData = config["Read"]["AccuWeatherData"]
     dataFetched = False
     log = runLogFolder + runLog
 
@@ -31,17 +29,6 @@ def fetchData(config, startTime):
     with open(log, "a") as file:
         file.write("fetch Data Cmd: " + fetchDataCmd)
 
-    if (dataFetched):
-        # Save AccuWeatherData to LastRun
-        with open(runLogFolder+"accuWeatherData.json", 'w') as outfile:
-            json.dump(apiData, outfile, sort_keys=True,
-                      indent=4, ensure_ascii=False)
-
-        # Save AccuWeatherData to StoreAccuWeatherData Folder
-        if (saveRawData):
-            with open(accuWeatherData+startTime+".json", 'w') as outfile:
-                json.dump(apiData, outfile, sort_keys=True,
-                          indent=4, ensure_ascii=False)
     return [dataFetched, apiData]
 
 
