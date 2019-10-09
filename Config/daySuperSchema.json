@@ -1,0 +1,89 @@
+{
+	"namespace": "weather.avro",
+	"type": "record",
+	"name": "DailyForecasts",
+	"fields":[
+		{
+			"name": "Date",
+			"fieldKey":1,
+			"multiple":0,
+			"accWeatherLabels":["Date"],
+			"type": "string"
+		},
+		{
+			"name": "MinTemperature_C",
+			"fieldKey":2,
+			"multiple":0,
+			"accWeatherLabels":["Temperature","Minimum","Value"],
+			"type": ["double","null"]
+		},
+		{
+			"name": "MaxTemp_C",
+			"fieldKey":3,
+			"multiple":0,
+			"accWeatherLabels":["Temperature","Maximum","Value"],
+			"type": ["double","null"]	
+		},
+		{
+			"name": "DayCloudCover",
+			"fieldKey":4,
+			"multiple":0,
+			"accWeatherLabels":["Day","CloudCover"],
+			"type": ["int","null"]
+		},
+		{	
+			"name": "DaySnow_cm",
+			"fieldKey":5,
+			"multiple":1,
+			"accWeatherLabels":["Day","Snow","Value"],
+			"type": ["double","null"]
+		},
+		{	
+			"name": "DayRain_mm",
+			"fieldKey":6,
+			"multiple":10,
+			"accWeatherLabels":["Day","Rain","Value"],
+			"type": ["double","null"]
+		},
+		{	
+			"name": "SunHours",
+			"fieldKey":7,
+			"multiple":0,
+			"accWeatherLabels":["HoursOfSun"],
+			"type": ["double","null"]
+		},
+		{	
+			"name": "SnowProbAtNight",
+			"fieldKey":8,
+			"multiple":0,
+			"accWeatherLabels":["Night","SnowProbability"],
+			"type":["int","null"]
+		},
+		{	
+			"name": "WindSpeedDay_km/h",
+			"fieldKey":9,
+			"multiple":0,
+			"accWeatherLabels":["Day","Wind","Speed","Value"],
+			"type": ["double","null"]
+		}
+		],
+	"otherFields":
+		{
+			"date.year":
+				{
+					"name":"Year",
+					"type":"int"
+				},
+		
+			"date.month":
+				{
+					"name":"Month",
+					"type":"int"
+				},
+			"date.day":
+				{
+					"name":"Day",
+					"type":"int"
+				}
+		}
+}

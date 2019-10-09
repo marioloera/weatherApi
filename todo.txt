@@ -1,0 +1,27 @@
+To Do:
+
+[x] save averageData data
+
+[x] save avroData in folder
+
+[x] save avroData in lastrun
+
+[x] add all the fields
+
+[x] test with real data
+
+[x] test gitRepo
+
+[ ] Add DB config, connect to DB
+
+[ ] Store something in DB
+
+[ ] AWS db 
+
+Extra:______________________
+
+	[x] programatically generatring avro.schema
+	[x] save avro.schema in lastRun
+	[x] use requests
+	[ ] update requirements
+	[ ] simple ETL

@@ -1,0 +1,39 @@
+{
+	"RunLog": {
+		"Folder": "RunLog/",
+		"LogFile": "Run.log"
+	},
+	
+	"Read": {
+		"AccuWeatherApi": {
+			"LocationKey": 314929,
+			"ApiKey": "cRdHhtI104J362qCvmOmeIPId0B2Ayhy",
+			"DaysOfForecasts": 5
+		},
+		"SaveRawData": false,
+		"AccuWeatherData": "AccuWeatherData/responseData",
+		"MockingDataFile": "AccuWeatherData/mockingData.json",
+		"MockinghMode": true
+	},
+
+	"ETL": {
+		"AdvanceMode": false,
+		"Extract": {
+			"Days": 2,
+			"DateISO8601Format":  "%Y-%m-%dT%H:%M:%S+02:00",
+			"DaySuperSchemaFile": "./Config/daySuperSchema.json",
+			"AutGenSchemaFile": "./AutGenAvroSchema.json"
+		},
+		"Load": {
+			"Avro": {
+				"SchemaFile": "./Config/dayAvroSchema.json",
+				"File": "ForecastAvroData.avro"
+			},
+			"AvgData": {
+				"Folder": "AverageForecastData/",
+				"StringSeparator": ", ",
+				"DWHForecastPath": "./WarehouseForecastData/"
+			}
+		}
+	}
+}

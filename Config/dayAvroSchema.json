@@ -1,0 +1,19 @@
+{
+	"namespace": "weather.avro",
+	"type": "record",
+	"name": "DailyForecasts",
+	"fields":[
+			{
+				"name": "date",
+				"type": "string"
+			},
+			{
+				"name": "temperatureMin_C",
+				"type": ["double","null"]
+			},
+			{
+				"name": "temperatureMax_C",
+				"type": ["double","null"]	
+			}
+	]
+}
