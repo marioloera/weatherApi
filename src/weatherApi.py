@@ -2,10 +2,10 @@ import requests
 import json
 
 
-def ReadData(config, startTime):
+def fetchData(config, startTime):
     print("**********************Reading Data****************************")
-    runLogFolder = config["RunLog"]["Folder"]
-    runLog = config["RunLog"]["LogFile"]
+    runLogFolder = config["Log"]["Folder"]
+    runLog = config["Log"]["LogFile"]
     mockinghMode = config["Read"]["MockinghMode"]
     mockingDataFile = config["Read"]["MockingDataFile"]
     saveRawData = config["Read"]["SaveRawData"]
@@ -22,14 +22,14 @@ def ReadData(config, startTime):
         numDays = config["Read"]["AccuWeatherApi"]["DaysOfForecasts"]
         locKey = config["Read"]["AccuWeatherApi"]["LocationKey"]
         apiKey = config["Read"]["AccuWeatherApi"]["ApiKey"]
-        [dataFetched, fetchDataCmd, apiData] = FetchApiData(numDays,
+        [dataFetched, fetchDataCmd, apiData] = _fetchApiData(numDays,
                                                             locKey,
                                                             apiKey,
                                                             log)
 
-    # Save CommandGetData to LastRun
-    with open(runLogFolder+'commandGetData.txt', "w") as file:
-        file.write(str(startTime) + '\n'+fetchDataCmd)
+    # append CommandGetData to log
+    with open(log, "a") as file:
+        file.write("fetch Data Cmd: " + fetchDataCmd)
 
     if (dataFetched):
         # Save AccuWeatherData to LastRun
@@ -45,8 +45,8 @@ def ReadData(config, startTime):
     return [dataFetched, apiData]
 
 
-def FetchApiData(numDays, locationKey, apiKey, log):
-    wasReaded = False
+def _fetchApiData(numDays, locationKey, apiKey, log):
+    dataFetched = False
     cmd = "http://dataservice.accuweather.com/forecasts/v1/daily/{num}day/{loc}?apikey={key}&details=true&metric=true".format(
                                 num=str(numDays),
                                 loc=str(locationKey),
@@ -54,7 +54,7 @@ def FetchApiData(numDays, locationKey, apiKey, log):
     try:
         r = requests.get(cmd)
         apiData = json.loads(r.text)
-        wasReaded = True
+        dataFetched = True
     except Exception as ex:
         statusMessage = "Reading Api Data Error!\n{}".format(repr(ex))
         apiData = {}
@@ -62,4 +62,4 @@ def FetchApiData(numDays, locationKey, apiKey, log):
         with open(log, "a") as file:
             file.write("{}\n".format(statusMessage))
         pass
-    return[wasReaded, cmd, apiData]
+    return[dataFetched,cmd, apiData]

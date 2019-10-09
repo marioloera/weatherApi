@@ -1,5 +1,5 @@
 {
-	"RunLog": {
+	"Log": {
 		"Folder": "data/logs/",
 		"LogFile": "run.log"
 	},
@@ -17,9 +17,9 @@
 	},
 
 	"ETL": {
-		"AdvanceMode": false,
+		"AdvanceMode": true,
 		"Extract": {
-			"Days": 1,
+			"Days": 2,
 			"DateISO8601Format":  "%Y-%m-%dT%H:%M:%S+02:00",
 			"DaySuperSchemaFile": "./config/daySuperSchema.json",
 			"AutGenSchemaFile": "./autGenAvroSchema.json"

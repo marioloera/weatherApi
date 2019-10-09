@@ -9,11 +9,11 @@ import pprint
 pp = pprint.PrettyPrinter(indent=1, width=3)
 
 
-def SimpleETL(config, rawJsonData):
+def simpleETL(config, rawJsonData):
     print("**********************Simple ET*************************")
     daysOfForecasts = len(rawJsonData["DailyForecasts"])
-    logFolder = config["RunLog"]["Folder"]
-    logFile = logFolder + config["RunLog"]["LogFile"]
+    logFolder = config["Log"]["Folder"]
+    logFile = logFolder + config["Log"]["LogFile"]
     days = []
     try:
         # ET
@@ -52,7 +52,7 @@ def SimpleETL(config, rawJsonData):
         # close writer
         writer.close()
         print("**********************Simple Check**********************")
-        ReadAvro(dataAvro)
+        _readAvro(dataAvro)
 
     except Exception as ex:
         print(ex)
@@ -60,26 +60,26 @@ def SimpleETL(config, rawJsonData):
             file.write("{}\n".format(ex))
 
 
-def AdvanceETL(config, apiDataJson):
+def advanceETL(config, apiDataJson):
     superSchemaFile = config["ETL"]["Extract"]["DaySuperSchemaFile"]
     superSchema = json.load(open(superSchemaFile, "r"))
-    [extractSuccesful, dayKeyArray] = ExtractData(config, superSchema, apiDataJson)
+    [extractSuccesful, dayKeyArray] = _extractData(config, superSchema, apiDataJson)
 
     if(extractSuccesful):
-        [tranformSuccesful, dayArray, avgTemp] = Transform(config, superSchema, dayKeyArray)
+        [tranformSuccesful, dayArray, avgTemp] = _transform(config, superSchema, dayKeyArray)
 
     if(tranformSuccesful):
         # Load AverageTemp Datafile
-        LoadAveTemp(config, avgTemp)
+        _loadAveTemp(config, avgTemp)
 
         # Load Forecast in Avro
-        LoadAvro(config, superSchema, dayArray)
+        _loadAvro(config, superSchema, dayArray)
 
 
-def ExtractData(config, superSchema, rawDataJson):
+def _extractData(config, superSchema, rawDataJson):
     print("**********************Extracting Data*************************")
-    logFolder = config["RunLog"]["Folder"]
-    logFile = logFolder + config["RunLog"]["LogFile"]
+    logFolder = config["Log"]["Folder"]
+    logFile = logFolder + config["Log"]["LogFile"]
     daysToExtract = config["ETL"]["Extract"]["Days"]
     daysOfForecasts = len(rawDataJson[superSchema["name"]])
     dayKeyArray = []
@@ -116,7 +116,7 @@ def ExtractData(config, superSchema, rawDataJson):
     return [status, dayKeyArray]
 
 
-def Transform(config, superSchema, dayKeyArray):
+def _transform(config, superSchema, dayKeyArray):
     print("**********************Transforming Data***********************")
     # Create dictinary for fielKey and "fiel"name maping
     status = False
@@ -164,14 +164,14 @@ def Transform(config, superSchema, dayKeyArray):
     return [status, dayArray, avgTemp]
 
 
-def LoadAvro(config, superSchema, daysArray):
+def _loadAvro(config, superSchema, daysArray):
     print("**********************Loading ForecastDataAvro****************")
-    logFolder = config["RunLog"]["Folder"]
+    logFolder = config["Log"]["Folder"]
     autGenSchemaFile = config["ETL"]["Extract"]["AutGenSchemaFile"]
     forecastAvroFile = config["ETL"]["Load"]["Avro"]["File"]
     dWHForecastPath = config["ETL"]["Load"]["AvgData"]["DWHForecastPath"]
     
-    dayAvroSchema = AutogenerateSchema(superSchema)
+    dayAvroSchema = _autogenerateSchema(superSchema)
 
     with open(logFolder+autGenSchemaFile, "w") as file:
         file.write(json.dumps(dayAvroSchema, indent=4))
@@ -192,17 +192,17 @@ def LoadAvro(config, superSchema, daysArray):
     # close writer
     writer.close()
     # pp.pprint(writer)
-    ReadAvro(avroFle)
+    _readAvro(avroFle)
 
 
-def ReadAvro(file):
+def _readAvro(file):
     print("***********This information was store in avro format *********")
     reader = DataFileReader(open(file,"rb"), DatumReader())
     for r in reader:
         pp.pprint(r)
 
 
-def AutogenerateSchema(baseShcema):
+def _autogenerateSchema(baseShcema):
     print("**********************Autogenerate Schema*********************")
     
     # target = json.load(open(DayAvroSchemaFile, "r"))
@@ -229,7 +229,7 @@ def AutogenerateSchema(baseShcema):
     return autGenSchema
 
 
-def LoadAveTemp(config, avgTemp):
+def _loadAveTemp(config, avgTemp):
     print("**********************Loading Average Temp Data***************")
     # load AverageForecastData
     avgDataFolder = config["ETL"]["Load"]["AvgData"]["Folder"]
