@@ -24,4 +24,5 @@ Extra:______________________
 	[x] save avro.schema in lastRun
 	[x] use requests
 	[ ] update requirements
-	[ ] simple ETL
+	[x] simple ETL
+	[ ] args

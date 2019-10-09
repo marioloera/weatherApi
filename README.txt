@@ -10,7 +10,7 @@ To excecute the program
 	python run.py
 
 You may need to install the packeges from requirements.txt
-	virtualenv -p python2 env
+	python3 -m venv /path/to/new/virtual/env
 	source ./env/bin/activate
 	pip install -r requirements.txt
 
