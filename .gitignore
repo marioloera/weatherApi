@@ -10,9 +10,7 @@ __pycache__/
 RunLog/
 
 # Output files
-WarehouseForecastData/
-AverageForecastData/
-AccuWeatherData/
+data/*
 
 # Distribution / packaging
 .Python

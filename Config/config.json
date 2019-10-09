@@ -10,7 +10,7 @@
 			"ApiKey": "cRdHhtI104J362qCvmOmeIPId0B2Ayhy",
 			"DaysOfForecasts": 5
 		},
-		"SaveRawData": true,
+		"SaveRawData": false,
 		"AccuWeatherData": "./data/accuWeatherData/apiData",
 		"MockingDataFile": "./data/accuWeatherData/mockingData.json",
 		"MockinghMode": true
@@ -19,7 +19,7 @@
 	"ETL": {
 		"AdvanceMode": false,
 		"Extract": {
-			"Days": 2,
+			"Days": 3,
 			"DateISO8601Format":  "%Y-%m-%dT%H:%M:%S+02:00",
 			"DaySuperSchemaFile": "./config/daySuperSchema.json",
 			"AutGenSchemaFile": "./autGenAvroSchema.json"
